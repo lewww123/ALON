@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load socialaccount %}
+
+{% block content %}
+
+<section class="pro-auth-page">
+
+    <div class="pro-auth-card">
+
+        <div class="pro-auth-left">
+            <div class="pro-auth-logo">
+                <h1>AL<span class="auth-vinyl"></span>N</h1>
+                <p>Create your wave of music.</p>
+            </div>
+
+            <div class="pro-auth-copy">
+                <h2>Start your music space.</h2>
+                <p>
+                    Sign up to upload songs, build your library, create playlists,
+                    and join music conversations.
+                </p>
+            </div>
+        </div>
+
+        <div class="pro-auth-right">
+
+            <div class="pro-form-header">
+                <h2>Create account</h2>
+                <p>Join ALON and start sharing your sound.</p>
+            </div>
+
+            {% if form.errors %}
+                <div class="auth-alert">
+                    Please check the information you entered.
+                </div>
+            {% endif %}
+
+            <div class="social-login-stack">
+                <a href="{% provider_login_url 'google' %}" class="btn auth-google-btn social-auth-btn">
+                    <img src="https://cdn.simpleicons.org/google" alt="Google" class="social-img">
+                    <span>Sign up with Google</span>
+                </a>
+
+                <a href="{% provider_login_url 'github' %}" class="btn auth-github-btn social-auth-btn">
+                    <img src="https://cdn.simpleicons.org/github/white" alt="GitHub" class="social-img">
+                    <span>Sign up with GitHub</span>
+                </a>
+            </div>
+
+            <div class="auth-divider">
+                <span>or create with password</span>
+            </div>
+
+            <form method="POST" action="{% url 'account_signup' %}" class="pro-auth-form">
+                {% csrf_token %}
+
+                {% for field in form %}
+                    <div class="pro-form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <small class="auth-help">{{ field.help_text }}</small>
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                            <small class="auth-error">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+
+                {% if redirect_field_value %}
+                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+                {% endif %}
+
+                <button type="submit" class="btn pro-submit-btn">
+                    Create Account
+                </button>
+            </form>
+
+            <p class="pro-auth-footer">
+                Already have an account?
+                <a href="{% url 'account_login' %}">Login here</a>
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

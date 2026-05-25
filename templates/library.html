@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="library-page">
+
+    <div class="library-header">
+        <div>
+            <p class="small-label">Your Library</p>
+            <h2>Music you uploaded and playlists you created</h2>
+        </div>
+    </div>
+
+    <div class="library-grid">
+
+        <section class="library-panel">
+            <div class="section-title">
+                <h2>Upload Music</h2>
+                <span>Add a new song to your library</span>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data" class="library-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="upload_track">
+                {{ upload_form.as_p }}
+                <button type="submit" class="btn post-btn">Upload</button>
+            </form>
+        </section>
+
+        <section class="library-panel">
+            <div class="section-title">
+                <h2>My Songs</h2>
+                <span>Your uploaded tracks</span>
+            </div>
+
+            <div class="library-list">
+                {% for track in user_tracks %}
+                    <div class="library-song-card">
+                        <div class="disc-icon"></div>
+                        <div>
+                            <h6>{{ track.title }}</h6>
+                            <p>{{ track.artist_name }}</p>
+                            <audio controls>
+                                <source src="{{ track.audio_file.url }}">
+                            </audio>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="empty-text">No uploaded songs yet.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="library-panel">
+            <div class="section-title">
+                <h2>Playlists</h2>
+                <span>Create and organize your songs</span>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data" class="library-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create_playlist">
+                {{ playlist_form.as_p }}
+                <button type="submit" class="btn post-btn">Create Playlist</button>
+            </form>
+
+            <div class="library-list mt-3">
+                {% for playlist in user_playlists %}
+                    <div class="playlist-card">
+                        <h6>{{ playlist.title }}</h6>
+                        <p>{{ playlist.description|truncatechars:70 }}</p>
+                    </div>
+                {% empty %}
+                    <p class="empty-text">No playlists yet.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+    </div>
+
+</section>
+
+{% endblock %}

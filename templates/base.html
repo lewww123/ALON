@@ -29,13 +29,12 @@
     <div class="collapse navbar-collapse" id="navbarMenu">
         <div class="ms-auto d-flex gap-2 mt-3 mt-lg-0">
             <a href="{% url 'home' %}" class="btn nav-btn">Home</a>
+            <a href="{% url 'community' %}" class="btn nav-btn">Community</a>
+            <a href="{% url 'api_music_list' %}" class="btn nav-btn">Discover</a>
 
             {% if user.is_authenticated %}
-                <a href="{% url 'feed' %}" class="btn nav-btn">Create Post</a>
-                <a href="{% url 'api_music_list' %}" class="btn nav-btn">Discover</a>
-                <a href="{% url 'upload_track' %}" class="btn nav-btn-dark">Upload Music</a>
-                <a href="{% url 'my_tracks' %}" class="btn nav-btn">My Tracks</a>
-                <a href="{% url 'account_logout' %}" class="btn nav-btn-danger">Logout</a>
+                <a href="{% url 'library' %}" class="btn nav-btn-dark">Library</a>
+                <a href="{% url 'profile' %}" class="btn nav-btn">Profile</a>
             {% else %}
                 <a href="{% url 'account_login' %}" class="btn nav-btn">Login</a>
                 <a href="{% url 'account_signup' %}" class="btn nav-btn-dark">Register</a>

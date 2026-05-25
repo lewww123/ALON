@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load socialaccount %}
+
+{% block content %}
+
+<section class="pro-auth-page">
+
+    <div class="pro-auth-card">
+
+        <div class="pro-auth-left">
+            <div class="pro-auth-logo">
+                <h1>AL<span class="auth-vinyl"></span>N</h1>
+                <p>Ride the wave of music.</p>
+            </div>
+
+            <div class="pro-auth-copy">
+                <h2>Discover. Share. Connect.</h2>
+                <p>
+                    Login to upload your songs, create playlists, join the community,
+                    and discover new sounds.
+                </p>
+            </div>
+        </div>
+
+        <div class="pro-auth-right">
+
+            <div class="pro-form-header">
+                <h2>Welcome back</h2>
+                <p>Enter your details to access your account.</p>
+            </div>
+
+            {% if form.errors %}
+                <div class="auth-alert">
+                    Please check your login details and try again.
+                </div>
+            {% endif %}
+
+            <div class="social-login-stack">
+                <a href="{% provider_login_url 'google' %}" class="btn auth-google-btn social-auth-btn">
+                    <img src="https://cdn.simpleicons.org/google" alt="Google" class="social-img">
+                    <span>Continue with Google</span>
+                </a>
+
+                <a href="{% provider_login_url 'github' %}" class="btn auth-github-btn social-auth-btn">
+                    <img src="https://cdn.simpleicons.org/github/white" alt="GitHub" class="social-img">
+                    <span>Continue with GitHub</span>
+                </a>
+            </div>
+
+            <div class="auth-divider">
+                <span>or login with password</span>
+            </div>
+
+            <form method="POST" action="{% url 'account_login' %}" class="pro-auth-form">
+                {% csrf_token %}
+
+                {% for field in form %}
+                    {% if field.name != "remember" %}
+                        <div class="pro-form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+
+                            {% for error in field.errors %}
+                                <small class="auth-error">{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+
+                {% if form.remember %}
+                    <div class="auth-remember">
+                        {{ form.remember }}
+                        <label for="{{ form.remember.id_for_label }}">Remember me</label>
+                    </div>
+                {% endif %}
+
+                {% if redirect_field_value %}
+                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+                {% endif %}
+
+                <button type="submit" class="btn pro-submit-btn">
+                    Login
+                </button>
+            </form>
+
+            <p class="pro-auth-footer">
+                Don’t have an account?
+                <a href="{% url 'account_signup' %}">Create account</a>
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

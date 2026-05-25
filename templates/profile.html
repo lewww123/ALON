@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="profile-page">
+
+    <div class="profile-card">
+        <div class="section-title">
+            <h2>Profile</h2>
+            <span>Manage your account information</span>
+        </div>
+
+        <form method="POST" class="profile-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <div class="form-actions">
+                <button type="submit" class="btn post-btn">Save Changes</button>
+                <a href="{% url 'account_logout' %}" class="btn nav-btn-danger">Logout</a>
+            </div>
+        </form>
+    </div>
+
+</section>
+
+{% endblock %}

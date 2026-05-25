@@ -1,11 +1,21 @@
 from django import forms
+from django.contrib.auth.models import User
 from .models import Track, Album, Playlist, MusicPost, Comment
 
 
 class TrackForm(forms.ModelForm):
     class Meta:
         model = Track
-        fields = ['album', 'title', 'artist_name', 'audio_file', 'cover_image', 'genre', 'description', 'is_public']
+        fields = [
+            'album',
+            'title',
+            'artist_name',
+            'audio_file',
+            'cover_image',
+            'genre',
+            'description',
+            'is_public',
+        ]
 
 
 class AlbumForm(forms.ModelForm):
@@ -17,7 +27,13 @@ class AlbumForm(forms.ModelForm):
 class PlaylistForm(forms.ModelForm):
     class Meta:
         model = Playlist
-        fields = ['title', 'description', 'cover', 'tracks', 'is_public']
+        fields = [
+            'title',
+            'description',
+            'cover',
+            'tracks',
+            'is_public',
+        ]
 
 
 class MusicPostForm(forms.ModelForm):
@@ -30,3 +46,14 @@ class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ['text']
+
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+        ]

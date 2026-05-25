@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="community-page">
+
+    <aside class="community-dashboard">
+        <div class="section-title">
+            <h2>Community</h2>
+            <span>See what people are talking about</span>
+        </div>
+
+        <div class="community-mini-stats">
+            <div>
+                <strong>{{ total_posts }}</strong>
+                <span>Posts</span>
+            </div>
+            <div>
+                <strong>{{ total_tracks }}</strong>
+                <span>Songs</span>
+            </div>
+            <div>
+                <strong>{{ total_playlists }}</strong>
+                <span>Playlists</span>
+            </div>
+        </div>
+
+        {% if user.is_authenticated %}
+            <form method="POST" class="community-post-form">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn post-btn">Post</button>
+            </form>
+        {% else %}
+            <p class="empty-text">
+                <a href="{% url 'account_login' %}">Login</a> to create a post.
+            </p>
+        {% endif %}
+    </aside>
+
+    <main class="community-feed">
+        {% for post in posts %}
+            <div class="post-card">
+                <div class="post-top">
+                    <div>
+                        <h5>@{{ post.author.username }}</h5>
+                        <small>{{ post.created_at }}</small>
+                    </div>
+                </div>
+
+                <p class="post-caption">{{ post.caption }}</p>
+
+                {% if post.track %}
+                    <div class="track-box">
+                        <strong>{{ post.track.title }}</strong>
+                        <span>by {{ post.track.artist_name }}</span>
+
+                        <audio controls class="w-100 mt-2">
+                            <source src="{{ post.track.audio_file.url }}">
+                        </audio>
+                    </div>
+                {% endif %}
+
+                <div class="comment-section">
+                    <h6>Comments</h6>
+
+                    {% for comment in post.comments.all %}
+                        <div class="comment-card">
+                            <div class="comment-header">
+                                <strong>@{{ comment.author.username }}</strong>
+                                <small>{{ comment.created_at }}</small>
+                            </div>
+
+                            {% if comment.text %}
+                                <p>{{ comment.text }}</p>
+                            {% endif %}
+
+                            {% if comment.track %}
+                                <div class="shared-track-box">
+                                    <span>Shared Music</span>
+                                    <h6>{{ comment.track.title }}</h6>
+                                    <p>by {{ comment.track.artist_name }}</p>
+
+                                    <audio controls class="w-100 mt-2">
+                                        <source src="{{ comment.track.audio_file.url }}">
+                                    </audio>
+                                </div>
+                            {% endif %}
+
+                            {% if comment.playlist %}
+                                <div class="shared-playlist-box">
+                                    <span>Shared Playlist</span>
+                                    <h6>{{ comment.playlist.title }}</h6>
+                                    <p>{{ comment.playlist.description|truncatechars:70 }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% empty %}
+                        <p class="empty-text">No comments yet.</p>
+                    {% endfor %}
+
+                    {% if user.is_authenticated %}
+                        <form method="POST" action="{% url 'add_comment' post.id %}" class="comment-form">
+                            {% csrf_token %}
+
+                            <textarea name="text" rows="2" placeholder="Write a comment..."></textarea>
+
+                            <select name="track">
+                                <option value="">Share music optional</option>
+                                {% for track in user_tracks %}
+                                    <option value="{{ track.id }}">{{ track.title }} - {{ track.artist_name }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <select name="playlist">
+                                <option value="">Share playlist optional</option>
+                                {% for playlist in user_playlists %}
+                                    <option value="{{ playlist.id }}">{{ playlist.title }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <button type="submit" class="btn comment-btn">Comment</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <div class="empty-card">
+                <p>No community posts yet.</p>
+            </div>
+        {% endfor %}
+    </main>
+
+    <aside class="community-side">
+        <div class="section-title">
+            <h2>New Songs</h2>
+            <span>Fresh uploads</span>
+        </div>
+
+        {% for track in latest_tracks %}
+            <div class="mini-music-card">
+                <div class="disc-icon"></div>
+                <div>
+                    <h6>{{ track.title }}</h6>
+                    <p>{{ track.artist_name }}</p>
+                </div>
+            </div>
+        {% empty %}
+            <p class="empty-text">No songs yet.</p>
+        {% endfor %}
+
+        <div class="section-title mt-4">
+            <h2>Playlists</h2>
+            <span>From users</span>
+        </div>
+
+        {% for playlist in playlists %}
+            <div class="playlist-card">
+                <h6>{{ playlist.title }}</h6>
+                <p>{{ playlist.description|truncatechars:50 }}</p>
+            </div>
+        {% empty %}
+            <p class="empty-text">No playlists yet.</p>
+        {% endfor %}
+    </aside>
+
+</section>
+
+{% endblock %}

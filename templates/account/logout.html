@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="auth-page">
+
+    <div class="auth-card logout-card">
+
+        <div class="auth-brand">
+            <h1>AL<span class="auth-vinyl"></span>N</h1>
+            <p>Thank you for riding the wave.</p>
+        </div>
+
+        <div class="section-title auth-title">
+            <h2>Logout</h2>
+            <span>Are you sure you want to leave ALON?</span>
+        </div>
+
+        <form method="POST" action="{% url 'account_logout' %}" class="auth-form">
+            {% csrf_token %}
+
+            {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+            {% endif %}
+
+            <div class="logout-actions">
+                <a href="{% url 'profile' %}" class="btn auth-cancel-btn">
+                    Cancel
+                </a>
+
+                <button type="submit" class="btn auth-main-btn">
+                    Yes, Logout
+                </button>
+            </div>
+        </form>
+
+    </div>
+
+</section>
+
+{% endblock %}

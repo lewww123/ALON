@@ -1,37 +1,26 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Track, Playlist, MusicPost, Comment
-from .forms import TrackForm, MusicPostForm
 import requests
 import random
 from django.conf import settings
+from django.db.models import Count
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+
+from .models import Track, Album, Playlist, MusicPost, Comment
+from .forms import TrackForm, PlaylistForm, MusicPostForm, UserProfileForm
 
 def home_view(request):
-    posts = MusicPost.objects.select_related(
-        'author',
-        'track'
-    ).prefetch_related(
-        'comments__author',
-        'comments__playlist',
-        'comments__track'
-    ).order_by('-created_at')
+    latest_tracks = Track.objects.filter(is_public=True).order_by('-uploaded_at')[:6]
 
-    latest_tracks = Track.objects.filter(is_public=True).order_by('-uploaded_at')[:8]
-    playlists = Playlist.objects.filter(is_public=True).order_by('-created_at')[:6]
+    popular_tracks = Track.objects.filter(is_public=True).annotate(
+        post_count=Count('musicpost')
+    ).order_by('-post_count', '-uploaded_at')[:6]
 
-    if request.user.is_authenticated:
-        user_playlists = Playlist.objects.filter(owner=request.user, is_public=True)
-        user_tracks = Track.objects.filter(owner=request.user, is_public=True)
-    else:
-        user_playlists = Playlist.objects.none()
-        user_tracks = Track.objects.none()
+    playlists = Playlist.objects.filter(is_public=True).order_by('-created_at')[:4]
 
     context = {
-        'posts': posts,
         'latest_tracks': latest_tracks,
+        'popular_tracks': popular_tracks,
         'playlists': playlists,
-        'user_playlists': user_playlists,
-        'user_tracks': user_tracks,
         'total_tracks': Track.objects.filter(is_public=True).count(),
         'total_playlists': Playlist.objects.filter(is_public=True).count(),
         'total_posts': MusicPost.objects.count(),
@@ -42,21 +31,7 @@ def home_view(request):
 
 @login_required
 def feed_view(request):
-    if request.method == 'POST':
-        form = MusicPostForm(request.POST)
-
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.save()
-            return redirect('home')
-    else:
-        form = MusicPostForm()
-
-    return render(request, 'feed.html', {
-        'form': form
-    })
-
+    return redirect('community')
 
 @login_required
 def upload_track(request):
@@ -126,7 +101,7 @@ def add_comment(request, post_id):
                 track=track
             )
 
-    return redirect('home')
+    return redirect('community')
 
 def api_music_list(request):
     query = request.GET.get('q', '').strip()
@@ -227,4 +202,107 @@ def api_music_list(request):
         "selected_artist": selected_artist,
         "featured_artists": artists,
         "error_message": error_message,
+    })
+
+def community_view(request):
+    posts = MusicPost.objects.select_related(
+        'author',
+        'track'
+    ).prefetch_related(
+        'comments__author',
+        'comments__playlist',
+        'comments__track'
+    ).order_by('-created_at')
+
+    latest_tracks = Track.objects.filter(is_public=True).order_by('-uploaded_at')[:5]
+    playlists = Playlist.objects.filter(is_public=True).order_by('-created_at')[:5]
+
+    if request.user.is_authenticated:
+        user_tracks = Track.objects.filter(owner=request.user, is_public=True)
+        user_playlists = Playlist.objects.filter(owner=request.user, is_public=True)
+
+        if request.method == 'POST':
+            form = MusicPostForm(request.POST)
+            form.fields['track'].queryset = user_tracks
+
+            if form.is_valid():
+                post = form.save(commit=False)
+                post.author = request.user
+                post.save()
+                return redirect('community')
+        else:
+            form = MusicPostForm()
+            form.fields['track'].queryset = user_tracks
+    else:
+        user_tracks = Track.objects.none()
+        user_playlists = Playlist.objects.none()
+        form = None
+
+    return render(request, 'community.html', {
+        'posts': posts,
+        'form': form,
+        'latest_tracks': latest_tracks,
+        'playlists': playlists,
+        'user_tracks': user_tracks,
+        'user_playlists': user_playlists,
+        'total_tracks': Track.objects.filter(is_public=True).count(),
+        'total_playlists': Playlist.objects.filter(is_public=True).count(),
+        'total_posts': MusicPost.objects.count(),
+    })
+    
+@login_required
+def library_view(request):
+    user_tracks = Track.objects.filter(owner=request.user).order_by('-uploaded_at')
+    user_playlists = Playlist.objects.filter(owner=request.user).order_by('-created_at')
+
+    upload_form = TrackForm()
+    playlist_form = PlaylistForm()
+
+    upload_form.fields['album'].queryset = Album.objects.filter(owner=request.user)
+    playlist_form.fields['tracks'].queryset = user_tracks
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'upload_track':
+            upload_form = TrackForm(request.POST, request.FILES)
+            upload_form.fields['album'].queryset = Album.objects.filter(owner=request.user)
+
+            if upload_form.is_valid():
+                track = upload_form.save(commit=False)
+                track.owner = request.user
+                track.save()
+                return redirect('library')
+
+        elif action == 'create_playlist':
+            playlist_form = PlaylistForm(request.POST, request.FILES)
+            playlist_form.fields['tracks'].queryset = user_tracks
+
+            if playlist_form.is_valid():
+                playlist = playlist_form.save(commit=False)
+                playlist.owner = request.user
+                playlist.save()
+                playlist_form.save_m2m()
+                return redirect('library')
+
+    return render(request, 'library.html', {
+        'upload_form': upload_form,
+        'playlist_form': playlist_form,
+        'user_tracks': user_tracks,
+        'user_playlists': user_playlists,
+    })
+    
+@login_required
+def profile_view(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=request.user)
+
+        if form.is_valid():
+            form.save()
+            return redirect('profile')
+    else:
+        form = UserProfileForm(instance=request.user)
+
+    return render(request, 'profile.html', {
+        'form': form
     })
