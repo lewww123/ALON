@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="alon-hero">
+    <div class="hero-text">
+        <h1>AL<span class="vinyl-record"></span>N</h1>
+
+        <p class="tagline">
+            Share your sound. Discover playlists. Ride the wave of music.
+        </p>
+
+        {% if user.is_authenticated %}
+            <a href="{% url 'upload_track' %}" class="btn hero-btn">
+                Upload Your Music
+            </a>
+        {% else %}
+            <a href="{% url 'account_signup' %}" class="btn hero-btn">
+                Join ALON
+            </a>
+        {% endif %}
+    </div>
+</section>
+
+<section class="dashboard-panel">
+
+    <div class="dashboard-header">
+        <div>
+            <p class="small-label">Community Dashboard</p>
+            <h2>What’s flowing today?</h2>
+        </div>
+
+        <p class="dashboard-subtitle">
+            Explore posts, new songs, and public playlists from other users.
+        </p>
+    </div>
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <h3>{{ total_tracks }}</h3>
+            <p>Public Tracks</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ total_playlists }}</h3>
+            <p>Playlists</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ total_posts }}</h3>
+            <p>Community Posts</p>
+        </div>
+
+    </div>
+
+</section>
+
+<section class="content-grid">
+
+    <!-- MAIN FEED -->
+    <div class="main-feed">
+
+        <div class="section-title">
+            <h2>Community Posts</h2>
+            <span>See what other users are sharing</span>
+        </div>
+
+        {% for post in posts %}
+
+        <div class="post-card">
+
+            <div class="post-top">
+                <div>
+                    <h5>@{{ post.author.username }}</h5>
+                    <small>{{ post.created_at }}</small>
+                </div>
+            </div>
+
+            <p class="post-caption">{{ post.caption }}</p>
+
+            {% if post.track %}
+                <div class="track-box">
+
+                    <strong>{{ post.track.title }}</strong>
+                    <span>by {{ post.track.artist_name }}</span>
+
+                    <audio controls class="w-100 mt-2">
+                        <source src="{{ post.track.audio_file.url }}">
+                        Your browser does not support the audio element.
+                    </audio>
+
+                </div>
+            {% endif %}
+
+            <!-- COMMENTS -->
+            <div class="comment-section mt-4">
+
+                <h6>Comments</h6>
+
+                {% for comment in post.comments.all %}
+
+                    <div class="comment-card">
+
+                        <div class="comment-header">
+                            <strong>@{{ comment.author.username }}</strong>
+                            <small>{{ comment.created_at }}</small>
+                        </div>
+
+                        {% if comment.text %}
+                            <p>{{ comment.text }}</p>
+                        {% endif %}
+
+                        <!-- SHARED MUSIC -->
+                        {% if comment.track %}
+                            <div class="shared-track-box">
+
+                                <span>Shared Music</span>
+
+                                <h6>{{ comment.track.title }}</h6>
+
+                                <p>
+                                    by {{ comment.track.artist_name }}
+                                </p>
+
+                                <audio controls class="w-100 mt-2">
+                                    <source src="{{ comment.track.audio_file.url }}">
+                                    Your browser does not support the audio element.
+                                </audio>
+
+                            </div>
+                        {% endif %}
+
+                        <!-- SHARED PLAYLIST -->
+                        {% if comment.playlist %}
+                            <div class="shared-playlist-box">
+
+                                <span>Shared Playlist</span>
+
+                                <h6>{{ comment.playlist.title }}</h6>
+
+                                <p>
+                                    {{ comment.playlist.description|truncatechars:80 }}
+                                </p>
+
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                {% empty %}
+
+                    <p class="empty-text">
+                        No comments yet.
+                    </p>
+
+                {% endfor %}
+
+                {% if user.is_authenticated %}
+
+                    <form method="POST"
+                          action="{% url 'add_comment' post.id %}"
+                          class="comment-form">
+
+                        {% csrf_token %}
+
+                        <textarea
+                            name="text"
+                            rows="2"
+                            placeholder="Write a comment...">
+                        </textarea>
+
+                        <!-- SHARE MUSIC -->
+                        <select name="track">
+
+                            <option value="">
+                                Share music optional
+                            </option>
+
+                            {% for track in user_tracks %}
+                                <option value="{{ track.id }}">
+                                    {{ track.title }} - {{ track.artist_name }}
+                                </option>
+                            {% endfor %}
+
+                        </select>
+
+                        <!-- SHARE PLAYLIST -->
+                        <select name="playlist">
+
+                            <option value="">
+                                Share playlist optional
+                            </option>
+
+                            {% for playlist in user_playlists %}
+                                <option value="{{ playlist.id }}">
+                                    {{ playlist.title }}
+                                </option>
+                            {% endfor %}
+
+                        </select>
+
+                        <button type="submit" class="btn comment-btn">
+                            Comment
+                        </button>
+
+                    </form>
+
+                {% else %}
+
+                    <p class="login-comment-text">
+                        <a href="{% url 'account_login' %}">
+                            Login
+                        </a>
+                        to comment and share music.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        {% empty %}
+
+        <div class="empty-card">
+            <p>
+                No posts yet. Be the first to share your music taste.
+            </p>
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    <!-- SIDE PANEL -->
+    <aside class="side-panel">
+
+        <div class="section-title">
+            <h2>New Songs</h2>
+            <span>Fresh uploads</span>
+        </div>
+
+        {% for track in latest_tracks %}
+
+            <div class="mini-music-card">
+
+                <div class="disc-icon"></div>
+
+                <div>
+                    <h6>{{ track.title }}</h6>
+                    <p>{{ track.artist_name }}</p>
+                </div>
+
+            </div>
+
+        {% empty %}
+
+            <p class="empty-text">
+                No songs uploaded yet.
+            </p>
+
+        {% endfor %}
+
+        <div class="section-title mt-5">
+            <h2>Playlists</h2>
+            <span>Made by the community</span>
+        </div>
+
+        {% for playlist in playlists %}
+
+            <div class="playlist-card">
+
+                <h6>{{ playlist.title }}</h6>
+
+                <p>
+                    {{ playlist.description|truncatechars:70 }}
+                </p>
+
+            </div>
+
+        {% empty %}
+
+            <p class="empty-text">
+                No playlists yet.
+            </p>
+
+        {% endfor %}
+
+    </aside>
+
+</section>
+
+{% endblock %}

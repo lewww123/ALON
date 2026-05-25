@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="discover-page">
+
+    <div class="section-title">
+        <h2>Discover Music</h2>
+        <span>Featured OPM and international artists selected for ALON</span>
+    </div>
+
+    {% if error_message %}
+        <div class="alert alert-warning">
+            {{ error_message }}
+        </div>
+    {% endif %}
+
+    <form method="GET" class="discover-search-form">
+
+        <input
+            type="text"
+            name="q"
+            placeholder="Search song, artist, or album..."
+            value="{% if query != 'Featured Mix' and query != 'Random Mix' %}{{ query }}{% endif %}"
+        >
+
+        <select name="type">
+            <option value="all" {% if search_type == "all" %}selected{% endif %}>All Songs</option>
+            <option value="song" {% if search_type == "song" %}selected{% endif %}>Song Title</option>
+            <option value="artist" {% if search_type == "artist" %}selected{% endif %}>Artist</option>
+            <option value="album" {% if search_type == "album" %}selected{% endif %}>Album</option>
+            <option value="composer" {% if search_type == "composer" %}selected{% endif %}>Composer</option>
+        </select>
+
+        <select name="country">
+            <option value="PH" {% if country == "PH" %}selected{% endif %}>Philippines / OPM</option>
+            <option value="US" {% if country == "US" %}selected{% endif %}>International / US</option>
+            <option value="GB" {% if country == "GB" %}selected{% endif %}>United Kingdom</option>
+            <option value="JP" {% if country == "JP" %}selected{% endif %}>Japan</option>
+            <option value="KR" {% if country == "KR" %}selected{% endif %}>Korea</option>
+            <option value="ALL" {% if country == "ALL" %}selected{% endif %}>No Country Filter</option>
+        </select>
+
+        <button type="submit" class="btn discover-btn">
+            Search
+        </button>
+
+    </form>
+
+    <div class="quick-searches mb-4">
+        <a href="?random=1&type=all&country={{ country }}" class="btn quick-btn">
+            Random Mix
+        </a>
+
+        {% for artist in featured_artists %}
+            <a href="?artist={{ artist|urlencode }}&type=artist&country={{ country }}" class="btn quick-btn">
+                {{ artist }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <div class="section-title">
+        <h2>{{ query }}</h2>
+        <span>Showing music results from iTunes Search API</span>
+    </div>
+
+    <div class="api-music-grid">
+
+        {% for track in api_tracks %}
+
+            <div class="api-track-card">
+
+                {% if track.artworkUrl100 %}
+                    <img src="{{ track.artworkUrl100 }}" alt="{{ track.trackName }}">
+                {% endif %}
+
+                <div class="api-track-body">
+
+                    <h5>
+                        {% if track.trackName %}
+                            {{ track.trackName }}
+                        {% else %}
+                            Untitled
+                        {% endif %}
+                    </h5>
+
+                    <p>
+                        {% if track.artistName %}
+                            {{ track.artistName }}
+                        {% else %}
+                            Unknown Artist
+                        {% endif %}
+                    </p>
+
+                    {% if track.collectionName %}
+                        <small>{{ track.collectionName }}</small>
+                    {% endif %}
+
+                    {% if track.primaryGenreName %}
+                        <p class="genre-label">{{ track.primaryGenreName }}</p>
+                    {% endif %}
+
+                    {% if track.previewUrl %}
+                        <audio controls class="w-100 mt-3">
+                            <source src="{{ track.previewUrl }}">
+                            Your browser does not support the audio element.
+                        </audio>
+                    {% else %}
+                        <p class="empty-text mt-3">No preview available.</p>
+                    {% endif %}
+
+                    {% if track.trackViewUrl %}
+                        <a href="{{ track.trackViewUrl }}" target="_blank" class="btn api-link-btn mt-3">
+                            View on Apple Music
+                        </a>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        {% empty %}
+
+            <div class="empty-card">
+                <p>No music found. Try another artist or search term.</p>
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endblock %}

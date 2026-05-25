@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>My Uploaded Tracks</h2>
+
+{% for track in tracks %}
+<div class="card music-card mb-3">
+    <div class="card-body">
+        <h5>{{ track.title }}</h5>
+        <p>{{ track.artist_name }}</p>
+
+        <audio controls class="w-100">
+            <source src="{{ track.audio_file.url }}">
+            Your browser does not support the audio element.
+        </audio>
+
+        <a href="{% url 'track_detail' track.id %}" class="btn btn-sm btn-warning mt-3">View</a>
+    </div>
+</div>
+{% empty %}
+<p>You have not uploaded any tracks yet.</p>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card music-card">
+    <div class="card-body">
+        <h2>{{ track.title }}</h2>
+        <p>By {{ track.artist_name }}</p>
+        <p>{{ track.description }}</p>
+
+        {% if track.cover_image %}
+            <img src="{{ track.cover_image.url }}" class="img-fluid rounded mb-3" style="max-width: 300px;">
+        {% endif %}
+
+        <audio controls class="w-100">
+            <source src="{{ track.audio_file.url }}">
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+</div>
+{% endblock %}

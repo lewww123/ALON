@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="create-post-page">
+
+    <div class="create-post-card">
+
+        <div class="section-title">
+            <h2>Create a Music Post</h2>
+            <span>Share your music taste with the ALON community</span>
+        </div>
+
+        <form method="POST" class="create-post-form">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <div class="form-actions">
+                <a href="{% url 'home' %}" class="btn cancel-btn">
+                    Back to Home
+                </a>
+
+                <button type="submit" class="btn post-btn">
+                    Post to Community
+                </button>
+            </div>
+        </form>
+
+    </div>
+
+</section>
+
+{% endblock %}
