@@ -7,6 +7,7 @@ urlpatterns = [
     path('community/', views.community_view, name='community'),
     path('library/', views.library_view, name='library'),
     path('profile/', views.profile_view, name='profile'),
+    path('create-post/', views.feed_view, name='feed'),
 
     # optional old routes, para hindi mag-error kung may old links
     path('create-post/', views.feed_view, name='feed'),

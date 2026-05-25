@@ -28,9 +28,10 @@ def home_view(request):
 
     return render(request, 'home.html', context)
 
-
-@login_required
 def feed_view(request):
+    if not request.user.is_authenticated:
+        return render(request, 'post_required.html')
+
     return redirect('community')
 
 @login_required
@@ -250,8 +251,11 @@ def community_view(request):
         'total_posts': MusicPost.objects.count(),
     })
     
-@login_required
+
 def library_view(request):
+    if not request.user.is_authenticated:
+        return render(request, 'library_required.html')
+
     user_tracks = Track.objects.filter(owner=request.user).order_by('-uploaded_at')
     user_playlists = Playlist.objects.filter(owner=request.user).order_by('-created_at')
 

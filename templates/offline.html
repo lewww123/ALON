@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="library-locked-page">
+
+    <div class="library-locked-card">
+
+        <div class="locked-icon">
+            <span>♪</span>
+        </div>
+
+        <p class="small-label">Offline Mode</p>
+
+        <h2>You are offline</h2>
+
+        <p>
+            ALON cannot connect right now. Please check your internet connection
+            and try again. Some previously loaded pages may still be available.
+        </p>
+
+        <div class="locked-actions">
+            <a href="{% url 'home' %}" class="btn alon-primary-btn">
+                Go Home
+            </a>
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

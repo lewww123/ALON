@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="library-locked-page">
+
+    <div class="library-locked-card">
+
+        <div class="locked-icon">
+            <span>♪</span>
+        </div>
+
+        <p class="small-label">Library Access</p>
+
+        <h2>Login or register first</h2>
+
+        <p>
+            Your Library is where you can upload music, manage your songs,
+            and create playlists. Please login or create an account to access it.
+        </p>
+
+        <div class="locked-actions">
+            <a href="{% url 'account_login' %}" class="btn alon-primary-btn">
+                Login
+            </a>
+
+            <a href="{% url 'account_signup' %}" class="btn alon-outline-btn">
+                Register
+            </a>
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

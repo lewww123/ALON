@@ -2,115 +2,194 @@
 
 {% block content %}
 
-<section class="home-page">
+<section class="alon-home-shell">
 
-    <div class="home-left">
+    <!-- LEFT SIDEBAR -->
+    <aside class="alon-side-nav">
 
-        <section class="alon-hero compact-hero">
-            <div class="hero-text">
-                <h1>AL<span class="vinyl-record"></span>N</h1>
+        <div class="alon-brand-card">
+            <h1>AL<span class="vinyl-record small-vinyl"></span>N</h1>
+            <p>Your wave of music.</p>
+        </div>
 
-                <p class="tagline">
-                    Your personal wave of songs, playlists, and community sounds.
+        <div class="alon-menu">
+            <a href="{% url 'home' %}" class="alon-menu-item active">Home</a>
+            <a href="{% url 'library' %}" class="alon-menu-item">Library</a>
+            <a href="{% url 'community' %}" class="alon-menu-item">Community</a>
+            <a href="{% url 'api_music_list' %}" class="alon-menu-item">Discover</a>
+        </div>
+
+        <div class="alon-stats-card">
+            <p class="small-label">Overview</p>
+
+            <div class="alon-stat-row">
+                <span>Tracks</span>
+                <strong>{{ total_tracks }}</strong>
+            </div>
+
+            <div class="alon-stat-row">
+                <span>Playlists</span>
+                <strong>{{ total_playlists }}</strong>
+            </div>
+
+            <div class="alon-stat-row">
+                <span>Posts</span>
+                <strong>{{ total_posts }}</strong>
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="alon-main-content">
+
+        <section class="alon-hero-card">
+            <div>
+                <p class="small-label">Welcome to ALON</p>
+
+                {% if user.is_authenticated %}
+                    <h2>Hi, {{ user.username }}.</h2>
+                {% else %}
+                    <h2>Discover your sound.</h2>
+                {% endif %}
+
+                <p>
+                    Upload your music, build playlists, discover tracks,
+                    and connect with the community.
                 </p>
 
-                <div class="hero-actions">
+                <div class="alon-hero-actions">
                     {% if user.is_authenticated %}
-                        <a href="{% url 'library' %}" class="btn hero-btn">Upload Your Music</a>
+                        <a href="{% url 'library' %}" class="btn alon-primary-btn">Upload Music</a>
                     {% else %}
-                        <a href="{% url 'account_signup' %}" class="btn hero-btn">Join ALON</a>
+                        <a href="{% url 'account_signup' %}" class="btn alon-primary-btn">Join ALON</a>
                     {% endif %}
 
-                    <a href="{% url 'community' %}" class="btn hero-outline-btn">Community</a>
+                    <a href="{% url 'community' %}" class="btn alon-outline-btn">Community</a>
                 </div>
+            </div>
+
+            <div class="alon-disc-showcase">
+                <div class="big-alon-disc"></div>
             </div>
         </section>
 
-        <section class="dashboard-panel compact-dashboard">
-            <div class="dashboard-header">
+        <section class="alon-section-card">
+            <div class="alon-section-header">
                 <div>
-                    <p class="small-label">Community Dashboard</p>
-                    <h2>What’s flowing today?</h2>
+                    <h3>New Songs</h3>
+                    <span>Fresh uploads from users</span>
                 </div>
             </div>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>{{ total_tracks }}</h3>
-                    <p>Public Tracks</p>
-                </div>
+            <div class="alon-song-grid">
+                {% for track in latest_tracks %}
+                    <div class="alon-song-card">
+                        <div class="song-cover">
+                            {% if track.cover_image %}
+                                <img src="{{ track.cover_image.url }}" alt="{{ track.title }}">
+                            {% else %}
+                                <div class="song-cover-placeholder">
+                                    <div class="disc-icon"></div>
+                                </div>
+                            {% endif %}
+                        </div>
 
-                <div class="stat-card">
-                    <h3>{{ total_playlists }}</h3>
-                    <p>Playlists</p>
-                </div>
+                        <div class="song-info">
+                            <h6>{{ track.title }}</h6>
+                            <p>{{ track.artist_name }}</p>
+                        </div>
 
-                <div class="stat-card">
-                    <h3>{{ total_posts }}</h3>
-                    <p>Community Talks</p>
-                </div>
-            </div>
-        </section>
-
-    </div>
-
-    <div class="home-right">
-
-        <section class="home-panel">
-            <div class="section-title">
-                <h2>New Songs</h2>
-                <span>Fresh uploads from users</span>
-            </div>
-
-            {% for track in latest_tracks %}
-                <div class="mini-music-card">
-                    <div class="disc-icon"></div>
-                    <div>
-                        <h6>{{ track.title }}</h6>
-                        <p>{{ track.artist_name }}</p>
+                        {% if track.audio_file %}
+                            <audio controls>
+                                <source src="{{ track.audio_file.url }}">
+                            </audio>
+                        {% endif %}
                     </div>
-                </div>
-            {% empty %}
-                <p class="empty-text">No songs uploaded yet.</p>
-            {% endfor %}
+                {% empty %}
+                    <div class="empty-card">
+                        <p>No songs uploaded yet.</p>
+                    </div>
+                {% endfor %}
+            </div>
         </section>
 
-        <section class="home-panel">
-            <div class="section-title">
-                <h2>Popular Songs</h2>
-                <span>Most shared in posts</span>
+        <section class="alon-section-card">
+            <div class="alon-section-header">
+                <div>
+                    <h3>Popular Songs</h3>
+                    <span>Most shared tracks in the community</span>
+                </div>
             </div>
 
-            {% for track in popular_tracks %}
-                <div class="mini-music-card">
-                    <div class="disc-icon"></div>
-                    <div>
-                        <h6>{{ track.title }}</h6>
-                        <p>{{ track.artist_name }}</p>
+            <div class="alon-track-list">
+                {% for track in popular_tracks %}
+                    <div class="alon-track-row">
+                        <div class="disc-icon"></div>
+
+                        <div>
+                            <h6>{{ track.title }}</h6>
+                            <p>{{ track.artist_name }}</p>
+                        </div>
+
+                        <span class="alon-pill">Popular</span>
                     </div>
-                </div>
-            {% empty %}
-                <p class="empty-text">No popular songs yet.</p>
-            {% endfor %}
+                {% empty %}
+                    <p class="empty-text">No popular songs yet.</p>
+                {% endfor %}
+            </div>
         </section>
 
-        <section class="home-panel">
-            <div class="section-title">
-                <h2>Playlists</h2>
-                <span>Community collections</span>
+    </main>
+
+    <!-- RIGHT PANEL -->
+    <aside class="alon-right-panel">
+
+        <section class="alon-now-card">
+            <p class="small-label">Now Flowing</p>
+            <h3>ALON Mix</h3>
+            <p>
+                A music space for uploads, playlists, and community sounds.
+            </p>
+
+            <div class="wave-bars">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </section>
+
+        <section class="alon-playlist-panel">
+            <div class="alon-section-header">
+                <div>
+                    <h3>Playlists</h3>
+                    <span>Community collections</span>
+                </div>
             </div>
 
             {% for playlist in playlists %}
-                <div class="playlist-card">
-                    <h6>{{ playlist.title }}</h6>
-                    <p>{{ playlist.description|truncatechars:60 }}</p>
+                <div class="alon-playlist-card">
+                    <div class="playlist-cover">
+                        {% if playlist.cover %}
+                            <img src="{{ playlist.cover.url }}" alt="{{ playlist.title }}">
+                        {% else %}
+                            <div class="playlist-cover-placeholder">♪</div>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <h6>{{ playlist.title }}</h6>
+                        <p>{{ playlist.description|truncatechars:55 }}</p>
+                    </div>
                 </div>
             {% empty %}
                 <p class="empty-text">No playlists yet.</p>
             {% endfor %}
         </section>
 
-    </div>
+    </aside>
 
 </section>
 
